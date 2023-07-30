@@ -1,4 +1,5 @@
 from itertools import product
+import random
 
 SUITS = {'spades', 'clubs', 'hearts', 'diamonds'}
 RANKS = range(2, 15)
@@ -62,6 +63,10 @@ class Deck:
         self.deck = []
         for rank, suit in product(RANKS, SUITS):
             self.deck.append(Card(rank, suit))
+        self._shuffle()
+
+    def get_deck_len(self):
+        return len(self.deck)
 
     def deal_hands(self, cards_per_hand: int, num_hands: int) -> list[list]:
         '''
@@ -88,8 +93,7 @@ class Deck:
         return hands
 
     def _shuffle(self):
-        # TODO: how to randomize a list?
-        pass
+        random.shuffle(self.deck)
 
     def get_card_by_idx(self, idx: int) -> Card:
         if idx > len(self.deck) - 1:
