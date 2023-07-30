@@ -27,6 +27,7 @@ class Card:
         return self._rank_str(self.rank) + ' of ' + self.suit
     
     def __repr__(self) -> str:
+        # TODO: lowkey could use actual emojis as repr here
         return self.__str__()
     
     def _rank_str(self, rank) -> str:
