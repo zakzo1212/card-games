@@ -66,6 +66,9 @@ class Deck:
             self.deck.append(Card(rank, suit))
         self._shuffle()
 
+    def __repr__(self):
+        return str(self.deck)
+
     def get_deck_len(self):
         return len(self.deck)
 
