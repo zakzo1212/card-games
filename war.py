@@ -6,7 +6,10 @@ import time
 class War:
     
     def __init__(self):
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(message)s'
+        )
         self.deck = Deck()
         self.p1_hand, self.p2_hand = self.deck.deal_hands(self.deck.get_deck_len() // 2, 2)
         self.round = 0      
