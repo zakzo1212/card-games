@@ -11,7 +11,7 @@ class HeadsUpRunout:
 
     def eval_hand_strength(self, hole):
         '''
-        TODO: evaluate the strength of equal hand types relative to each other
+        given a list of cards, return the best possible hand strength and the cards that make up that hand
         '''
         all_cards = hole + self.board
         best_strength = 0
@@ -25,8 +25,25 @@ class HeadsUpRunout:
             if rank > best_strength:
                 best_strength = rank
                 best_cards = combo
+            elif rank == best_strength:
+                best_strength = rank
+                if not self._first_hand_better_kicker(best_cards, combo):
+                    best_cards = combo
 
         return best_strength, best_cards
+    
+    def _first_hand_better_kicker(self, hand1, hand2):
+        '''
+        given two hands of the same rank, determine which hand is stronger
+        '''
+        hand1 = sorted(hand1, key=lambda card: card.get_rank_value())
+        hand2 = sorted(hand2, key=lambda card: card.get_rank_value())
+        for i in range(len(hand1)-1, -1, -1):
+            if hand1[i].get_rank_value() > hand2[i].get_rank_value():
+                return True
+            elif hand1[i].get_rank_value() < hand2[i].get_rank_value():
+                return False
+        return True
 
     def _eval_hand_strength(self, hand):
 
@@ -78,6 +95,21 @@ class HeadsUpRunout:
             return ranks['one_pair']
 
         return ranks['high_card']
+    
+    def _get_hand_name(self, hand_strength):
+        hand_names = {
+            10: 'Royal Flush',
+            9: 'Straight Flush',
+            8: 'Four of a Kind',
+            7: 'Full House',
+            6: 'Flush',
+            5: 'Straight',
+            4: 'Three of a Kind',
+            3: 'Two Pair',
+            2: 'One Pair',
+            1: 'High Card'
+        }
+        return hand_names[hand_strength]
 
     def _deal_flop(self):
         logging.info('Dealing the Flop:')
@@ -117,8 +149,20 @@ class HeadsUpRunout:
         p1_strength, p1_best_hand = self.eval_hand_strength(p1_hole)
         p2_strength, p2_best_hand = self.eval_hand_strength(p2_hole)
 
-        print(p1_strength, p2_strength)
-        print(p1_best_hand, p2_best_hand)
+        logging.info('Player 1 best hand: ' + str(p1_best_hand))
+        logging.info('Player 2 best hand: ' + str(p2_best_hand) + '\n')
+
+        if p1_strength > p2_strength:
+            logging.info('Player 1 wins with a {}!'.format(self._get_hand_name(p1_strength)))
+        elif p1_strength < p2_strength:
+            logging.info('Player 2 wins with a {}!'.format(self._get_hand_name(p2_strength)))
+        else:
+            if self._first_hand_better_kicker(p1_best_hand, p2_best_hand):
+                logging.info('Player 1 wins with a {} due to better kicker!'.format(self._get_hand_name(p1_strength)))
+            elif self._first_hand_better_kicker(p2_best_hand, p1_best_hand):
+                logging.info('Player 2 wins with a {} due to better kicker!'.format(self._get_hand_name(p2_strength)))
+            else:
+                logging.info('Tie! Player 1 and Player 2 split the pot')
 
 
 if __name__ == "__main__":

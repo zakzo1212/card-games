@@ -10,7 +10,7 @@ class War:
         self.deck = Deck()
         self.p1_hand, self.p2_hand = self.deck.deal_hands(self.deck.get_deck_len() // 2, 2)
         self.round = 0      
-        self.round_delay_secs = 0.01
+        self.round_delay_secs = 0.02
 
     def war(self, card_pool: list[Card] = []):
         if len(self.p1_hand) < 2:
