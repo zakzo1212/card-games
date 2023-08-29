@@ -10,4 +10,6 @@ Card Games to Simulate:
 
 # TODO
 
-- make repr of the cards an actual card (emoji representing suit + value)
+- output win probability for each player in poker
+- output current best hand on each street in poker
+- output draw possibilities in poker

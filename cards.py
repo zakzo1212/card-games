@@ -24,10 +24,21 @@ class Card:
         self.suit = suit
 
     def __str__(self) -> str:
-        return self._rank_str(self.rank) + ' of ' + self.suit
+        suits = {
+            'spades' : '♠',
+            'clubs' : '♣',
+            'hearts' : '♥',
+            'diamonds' : '♦'
+        }
+        face_cards = {
+            11 : 'J', 
+            12 : 'Q', 
+            13 : 'K', 
+            14 : 'A'
+        }
+        return face_cards.get(self.rank, str(self.rank)) + suits[self.suit]
     
     def __repr__(self) -> str:
-        # TODO: lowkey could use actual emojis as repr here
         return self.__str__()
     
     def _rank_str(self, rank) -> str:

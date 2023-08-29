@@ -5,7 +5,10 @@ import logging
 class HeadsUpRunout:
 
     def __init__(self):
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(message)s'
+        )
         self.deck = Deck()
         self.board = []
 
@@ -30,7 +33,7 @@ class HeadsUpRunout:
                 if not self._first_hand_better_kicker(best_cards, combo):
                     best_cards = combo
 
-        return best_strength, best_cards
+        return best_strength, sorted(best_cards, key=lambda card: card.get_rank_value(), reverse=True)
     
     def _first_hand_better_kicker(self, hand1, hand2):
         '''
@@ -43,7 +46,7 @@ class HeadsUpRunout:
                 return True
             elif hand1[i].get_rank_value() < hand2[i].get_rank_value():
                 return False
-        return True
+        return False
 
     def _eval_hand_strength(self, hand):
 
@@ -142,8 +145,11 @@ class HeadsUpRunout:
         logging.info('Player 1 hole cards: ' + str(p1_hole))
         logging.info('Player 2 hole cards: ' + str(p2_hole) + '\n')
 
+        input('Press enter to deal the flop...')
         self._deal_flop()
+        input('Press enter to deal the turn...')
         self._deal_turn()
+        input('Press enter to deal the river...')
         self._deal_river()
 
         p1_strength, p1_best_hand = self.eval_hand_strength(p1_hole)
@@ -160,10 +166,9 @@ class HeadsUpRunout:
             if self._first_hand_better_kicker(p1_best_hand, p2_best_hand):
                 logging.info('Player 1 wins with a {} due to better kicker!'.format(self._get_hand_name(p1_strength)))
             elif self._first_hand_better_kicker(p2_best_hand, p1_best_hand):
-                logging.info('Player 2 wins with a {} due to better kicker!'.format(self._get_hand_name(p2_strength)))
+                logging.info('Player 2 wins with a {} due to a better kicker!'.format(self._get_hand_name(p2_strength)))
             else:
                 logging.info('Tie! Player 1 and Player 2 split the pot')
-
 
 if __name__ == "__main__":
     game = HeadsUpRunout()
