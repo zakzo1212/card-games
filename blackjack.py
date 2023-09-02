@@ -1,14 +1,21 @@
 from cards import Deck
 
-# TODO: implement betting
 # TODO: splitting pairs
 # TODO: doubling down
 # TODO: insurance 
+# TODO: play multiple rounds
+
+class Outcome:
+    TIE = 'tie'
+    PLAYER_WIN = 'player_win'
+    DEALER_WIN = 'dealer_win'
+
 class Blackjack:
 
     def __init__(self):
         self.deck = Deck()
         self.player_hand, self.dealer_hand = [], []
+        self.player_stack = 1000
 
     def _get_card_type(self, card):
         '''
@@ -65,7 +72,7 @@ class Blackjack:
         else:
             return False
         
-    def play_hand(self):
+    def play_player_hand(self):
         '''
         plays the player's hand
         '''
@@ -79,10 +86,10 @@ class Blackjack:
                     print('Player hand: {}'.format(self.player_hand))
                     if self._get_hand_value(self.player_hand) > 21:
                         print('Player busts!')
-                        break
+                        return self._get_hand_value(self.player_hand)
                 else:
-                    break
-
+                    return self._get_hand_value(self.player_hand)
+                
     def play_dealer_hand(self):
         '''
         plays the dealer's hand
@@ -91,25 +98,74 @@ class Blackjack:
             if self.check_dealer_natural():
                 break
             else:
-                print('IN HERE')
                 if self._get_hand_value(self.dealer_hand) < 17:
                     self.dealer_hand.append(self.deck.deal_next_card())
                     print('Dealer hand: {}'.format(self.dealer_hand))
                     if self._get_hand_value(self.dealer_hand) > 21:
                         print('Dealer busts!')
-                        break
+                        return self._get_hand_value(self.dealer_hand)
                 else:
                     print('Dealer stands with {}'.format(self._get_hand_value(self.dealer_hand)))
-                    break
+                    return self._get_hand_value(self.dealer_hand)
+
+    def play_hand(self):
+        '''
+        plays the player's hand and the dealer's hand and determines the winner
+        '''
+        player_outcome = self.play_player_hand()
+
+        if player_outcome > 21:
+            print('Dealer wins because player busted!')
+            return Outcome.DEALER_WIN
+
+        dealer_outcome = self.play_dealer_hand()
+
+        if dealer_outcome > 21:
+            print('Player wins because dealer busted!')
+            return Outcome.PLAYER_WIN
+        elif player_outcome > dealer_outcome:
+            print('Player wins!')
+            return Outcome.PLAYER_WIN
+        elif dealer_outcome > player_outcome:
+            print('Dealer wins!')
+            return Outcome.DEALER_WIN
+        else:
+            print('Tie!')
+            return Outcome.TIE
+
+    def make_bet(self):
+        '''
+        makes a bet before the hand
+        '''
+        bet = int(input('Place your bet: '))
+        if bet > self.player_stack:
+            print('You do not have enough money to place that bet!')
+            return self.make_bet()
+        else:
+            self.player_stack -= bet
+            print('Player stack: {}'.format(self.player_stack))
+        return bet
+
+    def settle_bets(self, outcome, bet):
+        '''
+        settles bets after the hand
+        '''
+        if outcome == Outcome.PLAYER_WIN:
+            self.player_stack += 2 * bet
+        elif outcome == Outcome.TIE:
+            self.player_stack += bet
+        print('Player stack: {}'.format(self.player_stack))
 
     def run(self):
+        bet = self.make_bet()
         self.deal()
 
         player_natural = self.check_player_natural()
         dealer_natural = self.check_dealer_natural()
 
-        self.play_hand()
-        self.play_dealer_hand()
+        outcome = self.play_hand()
+        self.settle_bets(outcome, bet)
+
 
 if __name__ == '__main__':
     game = Blackjack()
