@@ -1,4 +1,6 @@
 from cards import Deck
+import logging
+import time
 
 # TODO: splitting pairs
 # TODO: doubling down
@@ -13,6 +15,10 @@ class Outcome:
 class Blackjack:
 
     def __init__(self):
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(message)s'
+        )
         self.deck = Deck()
         self.player_hand, self.dealer_hand = [], []
         self.player_stack = 1000
@@ -47,8 +53,8 @@ class Blackjack:
 
     def deal(self):
         self.player_hand, self.dealer_hand = self.deck.deal_hands(2, 2)
-        print('Player hand: {}'.format(self.player_hand))
-        print('Dealer hand: [{}, {}]'.format(self.dealer_hand[0], "🂠"))
+        logging.info('\nPlayer hand: {}'.format(self.player_hand))
+        logging.info('Dealer hand: [{}, {}]\n'.format(self.dealer_hand[0], "🂠"))
 
     def check_player_natural(self):
         '''
@@ -56,7 +62,7 @@ class Blackjack:
         '''
         if (self._get_card_type(self.player_hand[0]) == 'Ace' and self._get_card_type(self.player_hand[1]) == 'Face') or \
             (self._get_card_type(self.player_hand[1]) == 'Ace' and self._get_card_type(self.player_hand[0]) == 'Face'):
-            print('Player has a natural blackjack!')
+            logging.info('Player has a natural blackjack!')
             return True
         else:
             return False
@@ -67,7 +73,7 @@ class Blackjack:
         '''
         if (self._get_card_type(self.dealer_hand[0]) == 'Ace' and self._get_card_type(self.dealer_hand[1]) == 'Face') or \
             (self._get_card_type(self.dealer_hand[1]) == 'Ace' and self._get_card_type(self.dealer_hand[0]) == 'Face'):
-            print('Dealer has a natural blackjack!')
+            logging.info('Dealer has a natural blackjack!')
             return True
         else:
             return False
@@ -78,14 +84,14 @@ class Blackjack:
         '''
         while True:
             if self.check_player_natural():
-                break
+                return self._get_hand_value(self.player_hand)
             else:
                 action = input('Hit or stand? (h/s) ')
                 if action == 'h':
                     self.player_hand.append(self.deck.deal_next_card())
-                    print('Player hand: {}'.format(self.player_hand))
+                    logging.info('Player hand: {}'.format(self.player_hand))
                     if self._get_hand_value(self.player_hand) > 21:
-                        print('Player busts!')
+                        logging.info('Player busts!')
                         return self._get_hand_value(self.player_hand)
                 else:
                     return self._get_hand_value(self.player_hand)
@@ -94,18 +100,23 @@ class Blackjack:
         '''
         plays the dealer's hand
         '''
+        wait_time = 1
+        logging.info('\nPlaying dealer hand...')
+        logging.info('Dealer starting hand: {}'.format(self.dealer_hand))
         while True:
+            time.sleep(wait_time)
             if self.check_dealer_natural():
-                break
+                return self._get_hand_value(self.dealer_hand)
             else:
                 if self._get_hand_value(self.dealer_hand) < 17:
+                    logging.info('Dealer hits')
                     self.dealer_hand.append(self.deck.deal_next_card())
-                    print('Dealer hand: {}'.format(self.dealer_hand))
+                    logging.info('Dealer hand: {}'.format(self.dealer_hand))
                     if self._get_hand_value(self.dealer_hand) > 21:
-                        print('Dealer busts!')
+                        logging.info('Dealer busts!')
                         return self._get_hand_value(self.dealer_hand)
                 else:
-                    print('Dealer stands with {}'.format(self._get_hand_value(self.dealer_hand)))
+                    logging.info('Dealer stands with {}'.format(self._get_hand_value(self.dealer_hand)))
                     return self._get_hand_value(self.dealer_hand)
 
     def play_hand(self):
@@ -115,35 +126,36 @@ class Blackjack:
         player_outcome = self.play_player_hand()
 
         if player_outcome > 21:
-            print('Dealer wins because player busted!')
+            logging.info('Dealer wins because player busted!')
             return Outcome.DEALER_WIN
 
         dealer_outcome = self.play_dealer_hand()
 
+        logging.info('\n')
+
         if dealer_outcome > 21:
-            print('Player wins because dealer busted!')
+            logging.info('Player wins because dealer busted!')
             return Outcome.PLAYER_WIN
         elif player_outcome > dealer_outcome:
-            print('Player wins!')
+            logging.info('Player wins!')
             return Outcome.PLAYER_WIN
         elif dealer_outcome > player_outcome:
-            print('Dealer wins!')
+            logging.info('Dealer wins!')
             return Outcome.DEALER_WIN
         else:
-            print('Tie!')
+            logging.info('Tie!')
             return Outcome.TIE
 
     def make_bet(self):
         '''
         makes a bet before the hand
         '''
-        bet = int(input('Place your bet: '))
+        bet = int(input('Place your bet (current stack: {}): '.format(self.player_stack)))
         if bet > self.player_stack:
-            print('You do not have enough money to place that bet!')
+            logging.info('You do not have enough money to place that bet!')
             return self.make_bet()
         else:
             self.player_stack -= bet
-            print('Player stack: {}'.format(self.player_stack))
         return bet
 
     def settle_bets(self, outcome, bet):
@@ -154,10 +166,15 @@ class Blackjack:
             self.player_stack += 2 * bet
         elif outcome == Outcome.TIE:
             self.player_stack += bet
-        print('Player stack: {}'.format(self.player_stack))
+        logging.info('Player stack: {}'.format(self.player_stack))
 
     def run(self):
+
+        logging.info('Let\'s play some blackjack!')
+        logging.info('Player starting stack: {}\n'.format(self.player_stack))
+
         while self.player_stack > 0:
+            logging.info('\nDealing new hand...')
             bet = self.make_bet()
             self.deal()
 
