@@ -3,7 +3,7 @@ from cards import Deck
 # TODO: splitting pairs
 # TODO: doubling down
 # TODO: insurance 
-# TODO: play multiple rounds
+# TODO: improve logging
 
 class Outcome:
     TIE = 'tie'
@@ -157,14 +157,15 @@ class Blackjack:
         print('Player stack: {}'.format(self.player_stack))
 
     def run(self):
-        bet = self.make_bet()
-        self.deal()
+        while self.player_stack > 0:
+            bet = self.make_bet()
+            self.deal()
 
-        player_natural = self.check_player_natural()
-        dealer_natural = self.check_dealer_natural()
+            # player_natural = self.check_player_natural()
+            # dealer_natural = self.check_dealer_natural()
 
-        outcome = self.play_hand()
-        self.settle_bets(outcome, bet)
+            outcome = self.play_hand()
+            self.settle_bets(outcome, bet)
 
 
 if __name__ == '__main__':
